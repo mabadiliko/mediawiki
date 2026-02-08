@@ -1,0 +1,7 @@
+Dockerfile
+README.md
+CLAUDE.md
+.dockerignore
+.git/
+.github/
+.claude/
