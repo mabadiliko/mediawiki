@@ -102,7 +102,7 @@ RUN set -eux; \
 RUN set -eux; \
     for ext in "${MW_HOME}/extensions"/*; do \
         if [ -d "${ext}" ] && [ -f "${ext}/composer.json" ]; then \
-            cd "${ext}" && composer install --no-dev --optimize-autoloader; \
+            cd "${ext}" && composer install --no-dev --optimize-autoloader --no-audit; \
         fi; \
     done; \
     chown -R www-data:www-data "${MW_HOME}/extensions"; \
