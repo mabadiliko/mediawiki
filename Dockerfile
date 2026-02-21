@@ -100,9 +100,10 @@ RUN set -eux; \
 
 # Install PHP dependencies for any extension that declares a composer.json.
 RUN set -eux; \
+    composer config --global --json audit.ignore '["PKSA-y2cr-5h3j-g3ys", "PKSA-2kqm-ps5x-s4f5"]'; \
     for ext in "${MW_HOME}/extensions"/*; do \
         if [ -d "${ext}" ] && [ -f "${ext}/composer.json" ]; then \
-            cd "${ext}" && composer install --no-dev --optimize-autoloader --no-audit; \
+            cd "${ext}" && composer install --no-dev --optimize-autoloader; \
         fi; \
     done; \
     chown -R www-data:www-data "${MW_HOME}/extensions"; \
