@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Simplified custom MediaWiki image that bakes in required extensions.
 
-ARG MEDIAWIKI_BASE_IMAGE="docker.io/mediawiki:1.43"
+ARG MEDIAWIKI_BASE_IMAGE="docker.io/mediawiki:1.45"
 FROM ${MEDIAWIKI_BASE_IMAGE}
 
 ENV MW_HOME=/var/www/html \

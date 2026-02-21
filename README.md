@@ -1,19 +1,15 @@
 # MediaWiki Custom Image
 
-A custom [MediaWiki 1.43](https://www.mediawiki.org/) Docker image with bundled extensions, designed for Kubernetes deployments.
+A custom [MediaWiki 1.45](https://www.mediawiki.org/) Docker image with bundled extensions, designed for Kubernetes deployments.
 
-The official `mediawiki:1.43` image ships only the core extensions. To use additional extensions in Kubernetes you need to bake them into the image -- this repo does that.
+The official `mediawiki:1.45` image ships only the core extensions. To use additional extensions in Kubernetes you need to bake them into the image -- this repo does that.
 
-## Included extensions
+## Included extensions (basic image)
 
 | Extension | Source |
 |-----------|--------|
-| [DynamicPageList3](https://www.mediawiki.org/wiki/Extension:DynamicPageList3) | Intersection-based article lists |
-| [MsUpload](https://www.mediawiki.org/wiki/Extension:MsUpload) | Drag-and-drop file uploads |
 | [OpenID Connect](https://www.mediawiki.org/wiki/Extension:OpenID_Connect) | OIDC authentication |
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) | Authentication framework (required by OpenID Connect) |
-| [WindowsAzureStorage](https://www.mediawiki.org/wiki/Extension:WindowsAzureStorage) | Azure Blob Storage backend |
-| [AWS (mediawiki-aws-s3)](https://www.mediawiki.org/wiki/Extension:AWS) | S3/MinIO storage backend (unmaintained, use with caution) |
 
 ## Build
 
@@ -29,14 +25,14 @@ podman push your-registry/mediawiki:latest
 To change the base image version:
 
 ```bash
-podman build --build-arg MEDIAWIKI_BASE_IMAGE=docker.io/mediawiki:1.43 -t mediawiki-custom:latest .
+podman build --build-arg MEDIAWIKI_BASE_IMAGE=docker.io/mediawiki:1.45 -t mediawiki-custom:latest .
 ```
 
 ## How it works
 
 The Dockerfile:
 
-1. Extends the official `mediawiki:1.43` image
+1. Extends the official `mediawiki:1.45` image
 2. Installs `unzip`, `curl`, `python3`, and [Composer](https://getcomposer.org/)
 3. Copies everything under `extensions/` into the container
 4. Unpacks any `.tar.gz` or `.zip` archives, deriving the correct extension directory name from `extension.json` metadata
@@ -45,7 +41,7 @@ The Dockerfile:
 
 ## Adding or removing extensions
 
-1. **Download** the extension tarball from [mediawiki.org](https://www.mediawiki.org/wiki/Special:ExtensionDistributor) (choose the branch matching your MediaWiki version, e.g. REL1_43)
+1. **Download** the extension tarball from [mediawiki.org](https://www.mediawiki.org/wiki/Special:ExtensionDistributor) (choose the branch matching your MediaWiki version, e.g. REL1_45)
 2. **Drop** the `.tar.gz` into the `extensions/` directory
 3. **Rebuild** the image
 
@@ -64,8 +60,6 @@ Place a `<filename>.sha256` file alongside any archive and the build will verify
 The image contains the extensions but does not enable them. You enable extensions in your `LocalSettings.php`:
 
 ```php
-wfLoadExtension( 'DynamicPageList3' );
-wfLoadExtension( 'MsUpload' );
 wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenID Connect' );
 // etc.

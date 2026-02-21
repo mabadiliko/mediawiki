@@ -2,7 +2,11 @@ name: Build and push Docker image
 
 on:
   push:
-    branches: [main]
+    branches-ignore:
+      - "dependabot/**"
+      - "renovate/**"
+      - "feature/**"
+      - "wip/**"
 
 env:
   REGISTRY: ghcr.io
@@ -36,7 +40,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix=
 
       - name: Build and push
