@@ -10,6 +10,8 @@ The official `mediawiki:1.45` image ships only the core extensions. To use addit
 |-----------|--------|
 | [OpenID Connect](https://www.mediawiki.org/wiki/Extension:OpenID_Connect) | OIDC authentication |
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) | Authentication framework (required by OpenID Connect) |
+| [Realnames](https://www.mediawiki.org/wiki/Extension:Realnames) | Add realname to all username links |
+
 
 ## Build
 
@@ -62,6 +64,7 @@ The image contains the extensions but does not enable them. You enable extension
 ```php
 wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenID Connect' );
+wfLoadExtension( 'Realnames' );
 // etc.
 ```
 
