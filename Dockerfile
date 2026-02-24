@@ -109,6 +109,24 @@ RUN set -eux; \
     chown -R www-data:www-data "${MW_HOME}/extensions"; \
     rm -rf /tmp/extensions /tmp/ext_name.py
 
+# Create empty locale stubs for any i18n/api directory that ships only 'en.json'.
+# Prevents LocalisationCache from emitting filemtime() warnings on every request when
+# $wgLanguageCode is set to a language without translations for that sub-module (e.g. 'sv').
+ARG MW_EXTRA_LOCALES="sv"
+RUN set -eux; \
+    for lang in ${MW_EXTRA_LOCALES}; do \
+        find "${MW_HOME}/extensions" "${MW_HOME}/skins" \
+             -type d -name "api" -path "*/i18n/api" \
+          | while read -r dir; do \
+                [ -f "${dir}/${lang}.json" ] || \
+                    printf '{"@metadata":{"authors":[]}}\n' > "${dir}/${lang}.json"; \
+            done; \
+    done
+
+# Enable APCu for PHP CLI so that maintenance scripts (e.g. update.php) can use
+# the same in-process cache as the web workers.  By default apc.enable_cli = 0.
+RUN echo 'apc.enable_cli = 1' >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+
 # Switch Apache to listen on 8080 to avoid privileged port binding restrictions in locked-down runtimes.
 # RUN set -eux; \
 #     sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf; \
