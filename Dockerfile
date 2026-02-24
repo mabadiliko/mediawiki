@@ -123,6 +123,12 @@ RUN set -eux; \
             done; \
     done
 
+# Lightweight probe endpoint — returns 200 OK without bootstrapping MediaWiki or
+# touching the database.  Used by Kubernetes liveness and readiness probes.
+RUN printf '<?php\nhttp_response_code(200);\nheader("Content-Type: text/plain");\necho "OK\\n";\n' \
+    > "${MW_HOME}/ping.php" \
+    && chown www-data:www-data "${MW_HOME}/ping.php"
+
 # Enable APCu for PHP CLI so that maintenance scripts (e.g. update.php) can use
 # the same in-process cache as the web workers.  By default apc.enable_cli = 0.
 RUN echo 'apc.enable_cli = 1' >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
