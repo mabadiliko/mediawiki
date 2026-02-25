@@ -5,7 +5,8 @@ ARG MEDIAWIKI_BASE_IMAGE="docker.io/mediawiki:1.45"
 FROM ${MEDIAWIKI_BASE_IMAGE}
 
 ENV MW_HOME=/var/www/html \
-    COMPOSER_ALLOW_SUPERUSER=1
+    COMPOSER_ALLOW_SUPERUSER=1 \
+    TZ="Europe/Stockholm"
 
 # USER root
 
