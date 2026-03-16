@@ -68,7 +68,19 @@ wfLoadExtension( 'Realnames' );
 // etc.
 ```
 
-In Kubernetes, mount `LocalSettings.php` via a ConfigMap. See the companion Helm chart for a complete deployment setup.
+In Kubernetes, mount `LocalSettings.php` via a ConfigMap. See the [Helm chart](chart/) in this repo for a complete deployment setup.
+
+## Helm chart
+
+A Helm chart for deploying this image to Kubernetes lives in [`chart/`](chart/). It covers the Deployment, Service, Ingress, ConfigMap (LocalSettings.php), PVC, and a post-install schema update Job.
+
+The chart is published to GHCR as an OCI package on every push to `main`:
+
+```bash
+helm install mediawiki oci://ghcr.io/mabadiliko/mediawiki/mediawiki --version 0.4.0
+```
+
+See [`chart/README.md`](chart/README.md) for full configuration reference.
 
 ## Notes
 

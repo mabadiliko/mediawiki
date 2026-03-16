@@ -1,0 +1,24 @@
+{{- if and (eq .Values.objectStore.type "pvc") (not .Values.objectStore.pvc.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mediawiki.fullname" . }}-uploads
+  labels:
+    {{- include "mediawiki.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.objectStore.pvc.retain }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with .Values.objectStore.pvc.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.objectStore.pvc.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.objectStore.pvc.size | quote }}
+  {{- if .Values.objectStore.pvc.storageClassName }}
+  storageClassName: {{ .Values.objectStore.pvc.storageClassName | quote }}
+  {{- end }}
+{{- end }}

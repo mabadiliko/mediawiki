@@ -1,0 +1,119 @@
+{{- if .Values.job.update.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mediawiki.fullname" . }}-update
+  labels:
+    {{- include "mediawiki.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  {{- if .Values.job.update.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.job.update.ttlSecondsAfterFinished }}
+  {{- end }}
+  backoffLimit: {{ .Values.job.update.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "mediawiki.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "mediawiki.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      containers:
+        - name: update-schema
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["php", "maintenance/update.php", "--quick"]
+          envFrom: []
+          {{- if .Values.mediawiki.extraEnv }}
+          env:
+            {{- toYaml .Values.mediawiki.extraEnv | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: localsettings
+              mountPath: /var/www/html/LocalSettings.php
+              subPath: LocalSettings.php
+            - name: db-password
+              mountPath: /etc/mediawiki/secrets/db
+              readOnly: true
+            {{- if eq .Values.objectStore.type "pvc" }}
+            - name: uploads
+              mountPath: {{ .Values.objectStore.pvc.mountPath }}
+            {{- end }}
+            {{- if eq .Values.objectStore.type "minio" }}
+            - name: minio-credentials
+              mountPath: /etc/mediawiki/secrets/minio
+              readOnly: true
+            {{- else if eq .Values.objectStore.type "azure" }}
+            - name: azure-credentials
+              mountPath: /etc/mediawiki/secrets/azure
+              readOnly: true
+            {{- end }}
+            {{- if .Values.oidc.existingSecret }}
+            - name: oidc-secret
+              mountPath: /etc/mediawiki/secrets/oidc
+              readOnly: true
+            {{- end }}
+            {{- if .Values.site.existingSecret }}
+            - name: site-secrets
+              mountPath: /etc/mediawiki/secrets/site
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: localsettings
+          configMap:
+            name: {{ include "mediawiki.fullname" . }}-{{ .Values.mediawiki.configName }}
+        - name: db-password
+          secret:
+            secretName: {{ .Values.database.existingSecret }}
+            items:
+              - key: {{ .Values.database.passwordKey }}
+                path: password
+        {{- if eq .Values.objectStore.type "pvc" }}
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: {{ if .Values.objectStore.pvc.existingClaim }}{{ .Values.objectStore.pvc.existingClaim }}{{ else }}{{ include "mediawiki.fullname" . }}-uploads{{ end }}
+        {{- end }}
+        {{- if eq .Values.objectStore.type "minio" }}
+        - name: minio-credentials
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.objectStore.minio.accessKeySecret }}
+                  items:
+                    - key: {{ .Values.objectStore.minio.accessKeyKey }}
+                      path: accessKey
+              - secret:
+                  name: {{ .Values.objectStore.minio.secretKeySecret }}
+                  items:
+                    - key: {{ .Values.objectStore.minio.secretKeyKey }}
+                      path: secretKey
+        {{- else if eq .Values.objectStore.type "azure" }}
+        - name: azure-credentials
+          secret:
+            secretName: {{ .Values.objectStore.azure.keySecret }}
+            items:
+              - key: {{ .Values.objectStore.azure.keySecretKey }}
+                path: accountKey
+        {{- end }}
+        {{- if .Values.oidc.existingSecret }}
+        - name: oidc-secret
+          secret:
+            secretName: {{ .Values.oidc.existingSecret }}
+            items:
+              - key: {{ .Values.oidc.secretKey }}
+                path: clientSecret
+        {{- end }}
+        {{- if .Values.site.existingSecret }}
+        - name: site-secrets
+          secret:
+            secretName: {{ .Values.site.existingSecret }}
+            items:
+              - key: {{ .Values.site.secretKeyRef }}
+                path: secretKey
+              - key: {{ .Values.site.upgradeKeyRef }}
+                path: upgradeKey
+        {{- end }}
+{{- end }}

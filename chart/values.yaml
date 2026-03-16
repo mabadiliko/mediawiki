@@ -1,0 +1,143 @@
+replicaCount: 1
+
+# domain is the single value to change per environment (e.g. "wiki.example.com").
+# It sets $wgServer (https://<domain>), the ingress host, and the TLS secret host.
+# When set, site.server and ingress.hosts/tls are ignored.
+domain: ""
+
+image:
+  repository: docker.io/mediawiki
+  tag: "1.45"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podSecurityContext: {}
+
+# Leave empty to allow the upstream MediaWiki Apache image to run as root and bind to port 80.
+# If you harden this, switch the container to a non-privileged port or add the needed capabilities.
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+  hosts:
+    - host: wiki.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: wiki-tls
+      hosts:
+        - wiki.local
+
+resources: {}
+
+# Probe configuration. Uses /ping.php by default — a tiny PHP file baked into the image
+# that returns 200 OK without touching the database or bootstrapping MediaWiki.
+# Override in your values file if you need a different path or timing.
+livenessProbe:
+  httpGet:
+    path: /ping.php
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 60
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ping.php
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+site:
+  name: Scout Wiki
+  server: https://scoutwiki.local
+  scriptPath: ""
+  logo: ""
+  # Provide secretKey/upgradeKey either inline (convenient for local dev) or via a K8s Secret
+  # (recommended). If existingSecret is set, the inline values are ignored.
+  secretKey: ""
+  upgradeKey: ""
+  existingSecret: ""       # K8s Secret containing the keys below
+  secretKeyRef: "wiki-secret-key"    # key in the secret → $wgSecretKey
+  upgradeKeyRef: "wiki-upgrade-key"  # key in the secret → $wgUpgradeKey
+
+database:
+  host: mariadb.mariadb.svc.cluster.local
+  port: 3306
+  name: scoutwiki
+  user: scoutwiki
+  existingSecret: wiki-database
+  passwordKey: password
+
+objectStore:
+  type: pvc # change to azure when switching to Azure Blob Storage
+  minio:
+    bucket: scoutwiki
+    region: us-east-1
+    endpoint: http://minio.minio.svc.cluster.local:9000
+    publicUrl: "" # becomes $wgAWSBucketDomain; support strings like "https://$1.storage.example.com"
+    usePathStyle: true
+    accessKeySecret: wiki-minio
+    accessKeyKey: accessKey
+    secretKeySecret: wiki-minio
+    secretKeyKey: secretKey
+  azure:
+    container: wiki
+    endpoint: blob.core.windows.net
+    accountName: mystorageaccount
+    keySecret: wiki-azure-storage
+    keySecretKey: accountKey
+  pvc:
+    existingClaim: ""
+    storageClassName: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    retain: false
+    annotations: {}
+    mountPath: /var/www/html/images
+
+mediawiki:
+  configName: localsettings
+  extraEnv: []
+
+oidc:
+  # Set existingSecret to mount an OIDC client secret at /etc/mediawiki/secrets/oidc/clientSecret.
+  # Read it in extraPhp with: trim( file_get_contents('/etc/mediawiki/secrets/oidc/clientSecret') )
+  existingSecret: ""
+  secretKey: clientSecret
+
+localSettings:
+  extraPhp: ""
+
+job:
+  update:
+    enabled: true
+    backoffLimit: 1
+    ttlSecondsAfterFinished: 3600  # 1 hour; set to 0 for immediate cleanup, null to disable

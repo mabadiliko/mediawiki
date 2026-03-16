@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mediawiki.fullname" . }}-{{ .Values.mediawiki.configName }}
+  labels:
+    {{- include "mediawiki.labels" . | nindent 4 }}
+data:
+  LocalSettings.php: |
+    <?php
+    $wgSitename = "{{ .Values.site.name }}";
+    $wgServer = "{{ if .Values.domain }}https://{{ .Values.domain }}{{ else }}{{ .Values.site.server }}{{ end }}";
+    $wgScriptPath = "{{ .Values.site.scriptPath }}";
+    {{- if .Values.site.logo }}
+    $wgLogos = [ '1x' => "{{ .Values.site.logo }}" ];
+    {{- end }}
+
+    {{- if .Values.site.existingSecret }}
+    $wgSecretKey = trim( file_get_contents( '/etc/mediawiki/secrets/site/secretKey' ) );
+    $wgUpgradeKey = trim( file_get_contents( '/etc/mediawiki/secrets/site/upgradeKey' ) );
+    {{- else }}
+    $wgSecretKey = "{{ .Values.site.secretKey }}";
+    $wgUpgradeKey = "{{ .Values.site.upgradeKey }}";
+    {{- end }}
+
+    $wgDBserver = "{{ .Values.database.host }}";
+    $wgDBname = "{{ .Values.database.name }}";
+    $wgDBuser = "{{ .Values.database.user }}";
+    $wgDBpassword = trim( file_get_contents( '/etc/mediawiki/secrets/db/password' ) );
+    $wgDBtype = 'mysql';
+    $wgDBport = {{ .Values.database.port }};
+
+    $wgEnableUploads = true;
+    $wgUsePathInfo = true;
+    $wgCacheDirectory = "/tmp";
+
+    $wgUploadDirectory = "/var/www/html/images";
+    $wgUploadPath = "/images";
+    $wgHashedUploadDirectory = true;
+    $wgLocalFileRepo = [
+        'class' => 'LocalRepo',
+        'name' => 'local',
+        'directory' => $wgUploadDirectory,
+        'scriptDirUrl' => $wgScriptPath,
+        'url' => $wgUploadPath,
+        'hashLevels' => 2,
+        'deletedDir' => "{$wgUploadDirectory}/deleted",
+        'thumbDir' => "{$wgUploadDirectory}/thumb",
+    ];
+
+    {{- if .Values.localSettings.extraPhp }}
+    {{ .Values.localSettings.extraPhp | nindent 4 }}
+    {{- end }}
