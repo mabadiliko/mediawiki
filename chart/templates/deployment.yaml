@@ -28,6 +28,15 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if eq .Values.objectStore.type "pvc" }}
+      initContainers:
+        - name: fix-upload-permissions
+          image: busybox
+          command: ["chown", "-R", "33:33", "{{ .Values.objectStore.pvc.mountPath }}"]
+          volumeMounts:
+            - name: uploads
+              mountPath: {{ .Values.objectStore.pvc.mountPath }}
+      {{- end }}
       containers:
         - name: mediawiki
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
