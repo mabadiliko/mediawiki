@@ -6,12 +6,13 @@ The official `mediawiki:1.45` image ships only the core extensions. To use addit
 
 ## Included extensions (basic image)
 
-| Extension | Description |
-|-----------|--------|
-| [OpenID Connect](https://www.mediawiki.org/wiki/Extension:OpenID_Connect) | OIDC authentication |
-| [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) | Authentication framework (required by OpenID Connect) |
-| [Realnames](https://www.mediawiki.org/wiki/Extension:Realnames) | Add realname to all username links |
-| [Labeled Section Transclusion](https://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion) | Allows selective transclusion of marked-off sections of text |
+| Extension | Version | Description |
+|-----------|--------|--------|
+| [OpenID Connect](https://www.mediawiki.org/wiki/Extension:OpenID_Connect) | 8.3.0 | OIDC authentication |
+| [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) | 7.5.0 | Authentication framework (required by OpenID Connect) |
+| [Realnames](https://www.mediawiki.org/wiki/Extension:Realnames) | 0.8.0 | Add realname to all username links |
+| [Labeled Section Transclusion](https://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion) | REL1.45 | Allows selective transclusion of marked-off sections of text |
+| [MagicNoCache](https://www.mediawiki.org/wiki/Extension:MagicNoCache) | 1.6.0 | Disables the cache for any page __NOCACHE__ keyword |
 
 
 ## Build
@@ -67,6 +68,7 @@ wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenID Connect' );
 wfLoadExtension( 'Realnames' );
 wfLoadExtension( 'LabeledSectionTransclusion' );
+wfLoadExtension( 'MagicNoCache' );
 // etc.
 ```
 
