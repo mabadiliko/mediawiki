@@ -12,7 +12,8 @@ The official `mediawiki:1.45` image ships only the core extensions. To use addit
 | [PluggableAuth](https://www.mediawiki.org/wiki/Extension:PluggableAuth) | 7.5.0 | Authentication framework (required by OpenID Connect) |
 | [Realnames](https://www.mediawiki.org/wiki/Extension:Realnames) | 0.8.0 | Add realname to all username links |
 | [Labeled Section Transclusion](https://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion) | REL1.45 | Allows selective transclusion of marked-off sections of text |
-| [MagicNoCache](https://www.mediawiki.org/wiki/Extension:MagicNoCache) | 1.6.0 | Disables the cache for any page __NOCACHE__ keyword |
+| [MagicNoCache](https://www.mediawiki.org/wiki/Extension:MagicNoCache) | 1.6.0 | Disables the cache for any page with `__NOCACHE__` keyword |
+| [Mermaid](https://www.mediawiki.org/wiki/Extension:Mermaid) | 6.0.2 | Generate diagrams and flowcharts |
 
 
 ## Build
@@ -69,6 +70,7 @@ wfLoadExtension( 'OpenID Connect' );
 wfLoadExtension( 'Realnames' );
 wfLoadExtension( 'LabeledSectionTransclusion' );
 wfLoadExtension( 'MagicNoCache' );
+wfLoadExtension( 'Mermaid' );
 // etc.
 ```
 
