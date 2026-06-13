@@ -14,6 +14,7 @@ The official `mediawiki:1.45` image ships only the core extensions. To use addit
 | [Labeled Section Transclusion](https://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion) | REL1.45 | Allows selective transclusion of marked-off sections of text |
 | [MagicNoCache](https://www.mediawiki.org/wiki/Extension:MagicNoCache) | 1.6.0 | Disables the cache for any page with `__NOCACHE__` keyword |
 | [Mermaid](https://www.mediawiki.org/wiki/Extension:Mermaid) | 6.0.2 | Generate diagrams and flowcharts |
+| [DynamicPageList4](https://www.mediawiki.org/wiki/Extension:DynamicPageList4) | 4.0.4 (REL1_45) | Build article lists by category, namespace, template usage, etc. (the maintained successor to DynamicPageList3) |
 
 
 ## Build
@@ -71,6 +72,7 @@ wfLoadExtension( 'Realnames' );
 wfLoadExtension( 'LabeledSectionTransclusion' );
 wfLoadExtension( 'MagicNoCache' );
 wfLoadExtension( 'Mermaid' );
+wfLoadExtension( 'DynamicPageList4' );
 // etc.
 ```
 
