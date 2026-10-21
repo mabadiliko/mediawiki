@@ -100,10 +100,13 @@ RUN set -eux; \
     find "${MW_HOME}/extensions" -maxdepth 2 -type d -name ".git" -prune -exec rm -rf '{}' +
 
 # Install PHP dependencies for any extension that declares a composer.json.
+# require-dev is stripped first: without a lock file Composer still resolves
+# dev packages under --no-dev, so their pins and advisories can break the build.
 RUN set -eux; \
-    composer config --global --json audit.ignore '["PKSA-y2cr-5h3j-g3ys", "PKSA-2kqm-ps5x-s4f5", "PKSA-rdkp-vv9z-mjkg"]'; \
+    composer config --global --json audit.ignore '["PKSA-y2cr-5h3j-g3ys", "PKSA-2kqm-ps5x-s4f5"]'; \
     for ext in "${MW_HOME}/extensions"/*; do \
         if [ -d "${ext}" ] && [ -f "${ext}/composer.json" ]; then \
+            php -r '$f = $argv[1]; $j = json_decode(file_get_contents($f)); unset($j->{"require-dev"}); file_put_contents($f, json_encode($j, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));' "${ext}/composer.json"; \
             cd "${ext}" && composer install --no-dev --optimize-autoloader; \
         fi; \
     done; \
